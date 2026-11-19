@@ -1,0 +1,6 @@
+c2pa-python>=0.39
+cryptography>=42
+numpy>=1.26
+pillow>=10.0
+scikit-image>=0.22
+matplotlib>=3.8

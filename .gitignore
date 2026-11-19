@@ -1,0 +1,6 @@
+certs/
+out/
+__pycache__/
+*.pyc
+.venv/
+dataset/raw/
