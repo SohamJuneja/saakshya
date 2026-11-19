@@ -15,7 +15,7 @@ All lowercase, no spaces, no extra underscores inside a field.
 
 | Field | Allowed values | Notes |
 | --- | --- | --- |
-| `phone` | letters and digits, e.g. `pixel7`, `iphone13`, `redminote12` | Same name every time for the same phone |
+| `phone` | phone model + your initials, e.g. `iphone13sj`, `pixel7ak` | Initials make sure two members with the same phone never clash. Use the same name every time |
 | `label` | `real` or `screen` | `real` = photo of the actual scene, `screen` = photo of a screen showing it |
 | `screen` | `none`, `laptoplcd`, `phoneoled`, `monitor`, `tv` | Must be `none` for `real`, and must **not** be `none` for `screen` |
 | `scene` | letters and digits, e.g. `brick`, `fabric`, `desk` | Short word for what is in the photo |
@@ -24,8 +24,8 @@ All lowercase, no spaces, no extra underscores inside a field.
 Examples of one pair:
 
 ```
-pixel7_real_none_brick_001.jpg
-pixel7_screen_laptoplcd_brick_001.jpg
+pixel7ak_real_none_brick_001.jpg
+pixel7ak_screen_laptoplcd_brick_001.jpg
 ```
 
 The real photo and its screen photo share the same `phone`, `scene` and `nnn`.
@@ -39,6 +39,7 @@ For every scene:
    or TV) with brightness at maximum.
 3. Photograph the screen so it fills about **80% of the frame**, from
    **20 to 80 cm** away. This is the `screen` photo.
+   Avoid strong reflections of lamps or windows on the screen.
 
 You can repeat step 2 and 3 on several screen types for the same real photo.
 Each one gets its own `screen` value with the same `nnn`.
@@ -49,6 +50,8 @@ Each one gets its own `screen` value with the same `nnn`.
 - **1x zoom**
 - **No portrait mode, no night mode, no filters, no beauty mode**
 - Leave HDR and everything else on the phone's default setting
+- **iPhone users:** set Settings > Camera > Formats > **Most Compatible** before
+  shooting, otherwise photos save as `.heic` and get rejected. Rename `.JPG` to `.jpg`.
 
 ## 4. Transfer photos via Google Drive or USB only
 
@@ -60,6 +63,9 @@ and strips the EXIF data. The compression removes the fine screen
 patterns (moire) we are trying to detect, so a screen photo sent over WhatsApp
 looks like a real photo and is useless to us. `ingest.py` rejects photos with
 no EXIF or a short side under 1000 px for this reason.
+
+Do not use Google Photos backup in **"Storage saver"** mode: it compresses
+photos just like WhatsApp.
 
 ## 5. Include hard real scenes on purpose
 

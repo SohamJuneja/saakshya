@@ -7,6 +7,9 @@ For every file in the folder it:
   2. reads EXIF camera make/model and the image width/height
   3. rejects photos with no EXIF or a shorter side under 1000 px,
      which usually means the photo went through WhatsApp or similar
+  4. warns about accepted photos that are not part of a complete pair
+     (same phone, scene and number: one real + at least one screen).
+     These are only warnings; their status stays "ok".
 
 Usage:
     python dataset/ingest.py <photo_folder> [--out dataset/manifest.csv]
@@ -22,7 +25,7 @@ import argparse
 import csv
 import re
 import sys
-from collections import Counter
+from collections import Counter, defaultdict
 from pathlib import Path
 
 from PIL import Image, UnidentifiedImageError
@@ -111,6 +114,23 @@ def ingest(folder):
     return rows, problems
 
 
+def find_unpaired(rows):
+    """Accepted photos whose (phone, scene, idx) group lacks a real or a screen photo."""
+    groups = defaultdict(list)
+    for r in rows:
+        if r["status"] == "ok":
+            groups[(r["phone"], r["scene"], r["idx"])].append(r)
+    unpaired = []
+    for members in groups.values():
+        has_real = any(r["label"] == "real" for r in members)
+        has_screen = any(r["label"] == "screen" for r in members)
+        if has_real and has_screen:
+            continue
+        reason = "real photo with no screen photo" if has_real else "screen photo with no real photo"
+        unpaired += [(r["file"], reason) for r in members]
+    return sorted(unpaired)
+
+
 def print_summary(rows, problems):
     ok = [r for r in rows if r["status"] == "ok"]
     print(f"Checked {len(rows)} files: {len(ok)} ok, {len(rows) - len(ok)} rejected\n")
@@ -119,6 +139,13 @@ def print_summary(rows, problems):
         print("Problems:")
         for name, status, reason in problems:
             print(f"  {status:<11}{name}  ({reason})")
+        print()
+
+    unpaired = find_unpaired(rows)
+    if unpaired:
+        print("Unpaired photos (warning, not rejected):")
+        for name, reason in unpaired:
+            print(f"  {name}  ({reason})")
         print()
 
     counts = Counter((r["phone"], r["label"]) for r in ok)
